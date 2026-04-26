@@ -551,7 +551,7 @@ async function pointer(type) {
   if (!personneSelectee) return;
   const nom      = personneSelectee;
   const remarque = document.getElementById('remarque-input').value.trim();
-
+  console.log('Envoi pointage:', { nom, type, remarque });
   document.getElementById('btn-arrive').disabled = true;
   document.getElementById('btn-depart').disabled = true;
 
