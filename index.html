@@ -425,22 +425,30 @@
 
     <!-- Zone de confirmation (cachée par défaut) -->
     <div class="confirmation-zone" id="confirmation-zone">
-      <div>
-        <div class="confirm-name" id="confirm-name">Prénom Nom</div>
-        <div class="confirm-hint">Choisissez le type de pointage</div>
-      </div>
-      <div class="confirm-buttons">
-        <button class="btn btn-arrive" id="btn-arrive" onclick="pointer('arrivee')">
-          <span class="btn-icon">↗</span>
-          Arrivée
-        </button>
-        <button class="btn btn-depart" id="btn-depart" onclick="pointer('depart')">
-          <span class="btn-icon">↙</span>
-          Départ
-        </button>
-        <button class="btn btn-cancel" onclick="deselectionner()">Annuler</button>
-      </div>
-    </div>
+  <div>
+    <div class="confirm-name" id="confirm-name">Prénom Nom</div>
+    <div class="confirm-hint">Choisissez le type de pointage</div>
+  </div>
+  <!-- Champ remarque -->
+  <textarea id="remarque-input"
+    placeholder="Remarque (optionnel)..."
+    rows="2"
+    style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--cream-dark);
+           font-family:var(--font-body); font-size:14px; color:var(--ink); resize:none;
+           background:var(--cream); outline:none;">
+  </textarea>
+  <div class="confirm-buttons">
+    <button class="btn btn-arrive" id="btn-arrive" onclick="pointer('arrivee')">
+      <span class="btn-icon">↗</span>
+      Arrivée
+    </button>
+    <button class="btn btn-depart" id="btn-depart" onclick="pointer('depart')">
+      <span class="btn-icon">↙</span>
+      Départ
+    </button>
+    <button class="btn btn-cancel" onclick="deselectionner()">Annuler</button>
+  </div>
+</div>
 
     <!-- Grille du personnel -->
     <div class="personnel-grid" id="personnel-grid">
@@ -609,21 +617,20 @@ function deselectionner() {
 // ── ENREGISTRER UN POINTAGE ───────────────────────────────
 async function pointer(type) {
   if (!personneSelectee) return;
-  const nom = personneSelectee;
+  const nom     = personneSelectee;
+  const remarque = document.getElementById('remarque-input').value.trim();
 
-  // Désactiver les boutons
   document.getElementById('btn-arrive').disabled = true;
   document.getElementById('btn-depart').disabled = true;
 
   try {
     const ts = new Date().toISOString();
-    await api({ action: 'pointer', nom, type, timestamp: ts });
+    await api({ action: 'pointer', nom, type, timestamp: ts, remarque });
 
-    // Mettre à jour le statut local
     statusData[nom] = type === 'arrivee' ? 'Arrivée' : 'Départ';
-
     const label = type === 'arrivee' ? 'Arrivée' : 'Départ';
     afficherToast(`${label} enregistrée — ${nom}`, 'success');
+    document.getElementById('remarque-input').value = '';
     deselectionner();
 
   } catch (err) {
