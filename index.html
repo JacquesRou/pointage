@@ -536,7 +536,10 @@ function demarrerHorloge() {
 async function api(params) {
   const url = new URL(APPS_SCRIPT_URL);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const resp = await fetch(url.toString(), { method: 'GET' });
+  const resp = await fetch(url.toString(), {
+    method: 'GET',
+    redirect: 'follow',
+  });
   if (!resp.ok) throw new Error('Erreur réseau : ' + resp.status);
   const data = await resp.json();
   if (data.error) throw new Error(data.error);
