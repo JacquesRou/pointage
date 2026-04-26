@@ -83,35 +83,50 @@
     text-transform: capitalize;
   }
 
-  /* ── Layout principal ── */
+  /* Layout principal — paysage */
+.main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  grid-template-rows: 1fr;
+  gap: 0;
+  overflow: hidden;
+  height: calc(100vh - 82px);
+}
+
+/* Layout portrait — personnel en haut, agenda en bas */
+@media (orientation: portrait) {
   .main {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    grid-template-rows: 1fr;
-    gap: 0;
-    overflow: hidden;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 280px;
     height: calc(100vh - 82px);
   }
 
-  /* ── Panneau gauche : pointage ── */
-  .panel-pointage {
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    gap: 16px;
-    overflow: hidden;
-  }
-  .panel-title {
-    font-family: var(--font-title);
-    font-size: 19px;
-    font-weight: 400;
-    color: var(--ink-soft);
-    letter-spacing: 0.02em;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--cream-dark);
+  .panel-rdv {
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    order: 2;
   }
 
+  .panel-pointage {
+    order: 1;
+    overflow: hidden;
+  }
+
+  .personnel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  /* Zone de confirmation plus compacte en portrait */
+  .confirm-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .btn {
+    padding: 14px 10px;
+    font-size: 14px;
+  }
+}
   /* Grille du personnel */
   .personnel-grid {
     flex: 1;
