@@ -13,20 +13,20 @@
 <style>
   /* ── Variables ── */
   :root {
-    --ink:       #1a1a2e;
-    --ink-soft:  #3d3d5c;
-    --ink-muted: #8888aa;
-    --cream:     #f5f0e8;
-    --cream-dark:#ede7d8;
-    --gold:      #c9a84c;
-    --gold-light:#f0d070;
-    --arrive:    #2e7d5e;
-    --arrive-bg: #e8f5ef;
-    --depart:    #8b3a2e;
-    --depart-bg: #faeae7;
-    --card-bg:   #ffffff;
-    --shadow:    0 2px 16px rgba(26,26,46,0.10);
-    --radius:    16px;
+    --ink:        #1a1a2e;
+    --ink-soft:   #3d3d5c;
+    --ink-muted:  #8888aa;
+    --cream:      #f5f0e8;
+    --cream-dark: #ede7d8;
+    --gold:       #c9a84c;
+    --gold-light: #f0d070;
+    --arrive:     #2e7d5e;
+    --arrive-bg:  #e8f5ef;
+    --depart:     #8b3a2e;
+    --depart-bg:  #faeae7;
+    --card-bg:    #ffffff;
+    --shadow:     0 2px 16px rgba(26,26,46,0.10);
+    --radius:     16px;
     --font-title: 'DM Serif Display', serif;
     --font-body:  'DM Sans', sans-serif;
   }
@@ -52,10 +52,6 @@
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
-    <div class="header-left">
-  <h1>Librairie</h1>
-  <div class="subtitle">Gestion des présences — v<span id="version"></span></div>
-</div>
   }
   .header-left h1 {
     font-family: var(--font-title);
@@ -87,51 +83,64 @@
     text-transform: capitalize;
   }
 
-  /* Layout principal — paysage */
-.main {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  grid-template-rows: 1fr;
-  gap: 0;
-  overflow: hidden;
-  height: calc(100vh - 82px);
-}
-
-/* Layout portrait — personnel en haut, agenda en bas */
-@media (orientation: portrait) {
+  /* ── Layout principal — paysage ── */
   .main {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 280px;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    grid-template-rows: 1fr;
+    gap: 0;
+    overflow: hidden;
     height: calc(100vh - 82px);
   }
 
-  .panel-rdv {
-    border-left: none;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    order: 2;
+  /* ── Layout portrait — personnel en haut, agenda en bas ── */
+  @media (orientation: portrait) {
+    .main {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 280px;
+      height: calc(100vh - 82px);
+    }
+    .panel-rdv {
+      border-left: none;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      order: 2;
+    }
+    .panel-pointage {
+      order: 1;
+      overflow: hidden;
+    }
+    .personnel-grid {
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+    .confirm-buttons {
+      grid-template-columns: 1fr 1fr;
+    }
+    .btn {
+      padding: 14px 10px;
+      font-size: 14px;
+    }
   }
 
+  /* ── Panneau pointage ── */
   .panel-pointage {
-    order: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
     overflow: hidden;
   }
-
-  .personnel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  .panel-title {
+    font-family: var(--font-title);
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--cream-dark);
   }
 
-  /* Zone de confirmation plus compacte en portrait */
-  .confirm-buttons {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .btn {
-    padding: 14px 10px;
-    font-size: 14px;
-  }
-}
-  /* Grille du personnel */
+  /* ── Grille du personnel ── */
   .personnel-grid {
     flex: 1;
     overflow-y: auto;
@@ -281,7 +290,7 @@
   #toast.success { background: var(--arrive); }
   #toast.error   { background: var(--depart); }
 
-  /* ── Panneau droit : RDV ── */
+  /* ── Panneau RDV ── */
   .panel-rdv {
     background: var(--ink);
     padding: 24px;
@@ -345,23 +354,7 @@
   }
   @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
 
-  /* ── État de chargement ── */
-  .loading-overlay {
-    position: absolute;
-    inset: 0;
-    background: var(--cream);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    z-index: 50;
-  }
-  .loading-overlay h2 {
-    font-family: var(--font-title);
-    font-size: 24px;
-    color: var(--ink-soft);
-  }
+  /* ── Spinner ── */
   .spinner {
     width: 36px; height: 36px;
     border: 3px solid var(--cream-dark);
@@ -409,12 +402,10 @@
 </head>
 <body>
 
-<!-- CONFIG — MODIFIER ICI -->
+<!-- ── CONFIG — MODIFIER ICI ── -->
 <script>
-  document.getElementById('version').textContent = VERSION;
-  const VERSION = "1.0.5"; // Incrementez à chaque modification
+  const VERSION = "1.0.6";
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_Jdg6U5I-jp7mshxdBwRkQFP3Bwv28VMlrvXDSKxaQX224BUUsbrBYbN_ihHDdgDLXg/exec";
-  // Exemple : "https://script.google.com/macros/s/AKfycb.../exec"
 </script>
 
 <!-- Erreur de configuration -->
@@ -425,7 +416,7 @@
   </div>
 </div>
 
-<!-- Header -->
+<!-- ── Header ── -->
 <header>
   <div class="header-left">
     <h1>Librairie</h1>
@@ -437,7 +428,7 @@
   </div>
 </header>
 
-<!-- Contenu principal -->
+<!-- ── Contenu principal ── -->
 <div class="main" id="main-content">
 
   <!-- Panneau gauche : Pointage -->
@@ -446,30 +437,29 @@
 
     <!-- Zone de confirmation (cachée par défaut) -->
     <div class="confirmation-zone" id="confirmation-zone">
-  <div>
-    <div class="confirm-name" id="confirm-name">Prénom Nom</div>
-    <div class="confirm-hint">Choisissez le type de pointage</div>
-  </div>
-  <!-- Champ remarque -->
-  <textarea id="remarque-input"
-    placeholder="Remarque (optionnel)..."
-    rows="2"
-    style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--cream-dark);
-           font-family:var(--font-body); font-size:14px; color:var(--ink); resize:none;
-           background:var(--cream); outline:none;">
-  </textarea>
-  <div class="confirm-buttons">
-    <button class="btn btn-arrive" id="btn-arrive" onclick="pointer('arrivee')">
-      <span class="btn-icon">↗</span>
-      Arrivée
-    </button>
-    <button class="btn btn-depart" id="btn-depart" onclick="pointer('depart')">
-      <span class="btn-icon">↙</span>
-      Départ
-    </button>
-    <button class="btn btn-cancel" onclick="deselectionner()">Annuler</button>
-  </div>
-</div>
+      <div>
+        <div class="confirm-name" id="confirm-name">Prénom Nom</div>
+        <div class="confirm-hint">Choisissez le type de pointage</div>
+      </div>
+      <!-- Champ remarque -->
+      <textarea id="remarque-input"
+        placeholder="Remarque (optionnel)..."
+        rows="2"
+        style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--cream-dark);
+               font-family:var(--font-body); font-size:14px; color:var(--ink); resize:none;
+               background:var(--cream); outline:none;"></textarea>
+      <div class="confirm-buttons">
+        <button class="btn btn-arrive" id="btn-arrive" onclick="pointer('arrivee')">
+          <span class="btn-icon">↗</span>
+          Arrivée
+        </button>
+        <button class="btn btn-depart" id="btn-depart" onclick="pointer('depart')">
+          <span class="btn-icon">↙</span>
+          Départ
+        </button>
+        <button class="btn btn-cancel" onclick="deselectionner()">Annuler</button>
+      </div>
+    </div>
 
     <!-- Grille du personnel -->
     <div class="personnel-grid" id="personnel-grid">
@@ -493,15 +483,19 @@
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- ── Scripts ── -->
 <script>
 // ── ÉTAT DE L'APPLICATION ──────────────────────────────────
 let personnelData    = [];
-let statusData       = {};   // { nom: "Arrivée" | "Départ" | null }
+let statusData       = {};
 let personneSelectee = null;
 let toastTimer       = null;
 
 // ── INITIALISATION ────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  // Afficher la version
+  document.getElementById('version').textContent = VERSION;
+
   // Vérification de la configuration
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("COLLER_ICI")) {
     document.getElementById('config-error').style.display = 'flex';
@@ -526,8 +520,8 @@ function demarrerHorloge() {
     const mm  = String(now.getMinutes()).padStart(2, '0');
     document.getElementById('clock-time').textContent = hh + ':' + mm;
 
-    const jours   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-    const mois    = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const jours = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const mois  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
     document.getElementById('clock-date').textContent =
       jours[now.getDay()] + ' ' + now.getDate() + ' ' + mois[now.getMonth()];
   }
@@ -551,8 +545,6 @@ async function chargerPersonnel() {
   try {
     const data = await api({ action: 'getPersonnel' });
     personnelData = data.personnel || [];
-
-    // Charger les statuts du jour pour chaque personne
     await chargerTousLesStatuts();
     afficherPersonnel();
   } catch (err) {
@@ -607,35 +599,31 @@ function couleurAvatar(nom) {
 function selectionner(nom) {
   personneSelectee = nom;
 
-  // Afficher la zone de confirmation
   document.getElementById('confirm-name').textContent = nom;
   document.getElementById('confirmation-zone').classList.add('visible');
 
-  // Pré-sélectionner arrivée/départ selon le statut
-  const statut = statusData[nom];
+  const statut    = statusData[nom];
   const btnArrive = document.getElementById('btn-arrive');
   const btnDepart = document.getElementById('btn-depart');
 
-  // Mettre en évidence le bouton logique selon le contexte
   btnArrive.style.opacity = statut === 'Arrivée' ? '0.5' : '1';
   btnDepart.style.opacity = !statut || statut === 'Départ' ? '0.5' : '1';
 
   afficherPersonnel();
-
-  // Scroll vers la zone de confirmation
   document.getElementById('confirmation-zone').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function deselectionner() {
   personneSelectee = null;
   document.getElementById('confirmation-zone').classList.remove('visible');
+  document.getElementById('remarque-input').value = '';
   afficherPersonnel();
 }
 
 // ── ENREGISTRER UN POINTAGE ───────────────────────────────
 async function pointer(type) {
   if (!personneSelectee) return;
-  const nom     = personneSelectee;
+  const nom      = personneSelectee;
   const remarque = document.getElementById('remarque-input').value.trim();
 
   document.getElementById('btn-arrive').disabled = true;
@@ -648,7 +636,6 @@ async function pointer(type) {
     statusData[nom] = type === 'arrivee' ? 'Arrivée' : 'Départ';
     const label = type === 'arrivee' ? 'Arrivée' : 'Départ';
     afficherToast(`${label} enregistrée — ${nom}`, 'success');
-    document.getElementById('remarque-input').value = '';
     deselectionner();
 
   } catch (err) {
