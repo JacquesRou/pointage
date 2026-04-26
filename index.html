@@ -407,7 +407,7 @@
 
 <!-- CONFIG — MODIFIER ICI -->
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDfVpK_L3GZpSCAOD04rdSu1GwJRqT3pSNd9KZ1UNUKnBLqRg_bDr09qnOXRe4Q9w-iw/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_Jdg6U5I-jp7mshxdBwRkQFP3Bwv28VMlrvXDSKxaQX224BUUsbrBYbN_ihHDdgDLXg/exec";
   // Exemple : "https://script.google.com/macros/s/AKfycb.../exec"
 </script>
 
@@ -558,15 +558,12 @@ async function chargerPersonnel() {
 }
 
 async function chargerTousLesStatuts() {
-  const promesses = personnelData.map(async (p) => {
-    try {
-      const r = await api({ action: 'getDernierPointage', nom: p.nom });
-      statusData[p.nom] = r.dernier; // "Arrivée", "Départ" ou null
-    } catch {
-      statusData[p.nom] = null;
-    }
-  });
-  await Promise.all(promesses);
+  try {
+    const data = await api({ action: 'getTousLesStatutsDuJour' });
+    statusData = data.statuts || {};
+  } catch {
+    statusData = {};
+  }
 }
 
 function afficherPersonnel() {
