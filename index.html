@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a2e">
+<title>Librairie — Pointage</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Variables ── */
+  :root {
+    --ink:       #1a1a2e;
+    --ink-soft:  #3d3d5c;
+    --ink-muted: #8888aa;
+    --cream:     #f5f0e8;
+    --cream-dark:#ede7d8;
+    --gold:      #c9a84c;
+    --gold-light:#f0d070;
+    --arrive:    #2e7d5e;
+    --arrive-bg: #e8f5ef;
+    --depart:    #8b3a2e;
+    --depart-bg: #faeae7;
+    --card-bg:   #ffffff;
+    --shadow:    0 2px 16px rgba(26,26,46,0.10);
+    --radius:    16px;
+    --font-title: 'DM Serif Display', serif;
+    --font-body:  'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 20px 28px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-left h1 {
+    font-family: var(--font-title);
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--cream);
+  }
+  .header-left .subtitle {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+  .clock {
+    text-align: right;
+  }
+  .clock .time {
+    font-family: var(--font-title);
+    font-size: 32px;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .clock .date-str {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+    text-transform: capitalize;
+  }
+
+  /* ── Layout principal ── */
+  .main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    grid-template-rows: 1fr;
+    gap: 0;
+    overflow: hidden;
+    height: calc(100vh - 82px);
+  }
+
+  /* ── Panneau gauche : pointage ── */
+  .panel-pointage {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+    overflow: hidden;
+  }
+  .panel-title {
+    font-family: var(--font-title);
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+
+  /* Grille du personnel */
+  .personnel-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    align-content: start;
+    padding-right: 4px;
+  }
+  .personnel-grid::-webkit-scrollbar { width: 4px; }
+  .personnel-grid::-webkit-scrollbar-track { background: transparent; }
+  .personnel-grid::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 4px; }
+
+  .person-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 18px 14px 14px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+  .person-card:active { transform: scale(0.96); }
+  .person-card.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.2), var(--shadow);
+  }
+  .person-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-title);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .person-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .person-fonction {
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-align: center;
+  }
+  .person-status {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 2px;
+  }
+  .person-status.present {
+    background: var(--arrive-bg);
+    color: var(--arrive);
+  }
+  .person-status.absent {
+    background: var(--cream-dark);
+    color: var(--ink-muted);
+  }
+
+  /* ── Zone de confirmation ── */
+  .confirmation-zone {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .confirmation-zone.visible { display: flex; }
+  .confirm-name {
+    font-family: var(--font-title);
+    font-size: 22px;
+    color: var(--ink);
+  }
+  .confirm-hint {
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .confirm-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 18px 12px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+  }
+  .btn:active { transform: scale(0.96); opacity: 0.85; }
+  .btn-arrive {
+    background: var(--arrive);
+    color: #fff;
+  }
+  .btn-depart {
+    background: var(--depart);
+    color: #fff;
+  }
+  .btn-cancel {
+    background: var(--cream-dark);
+    color: var(--ink-soft);
+    grid-column: 1 / -1;
+    padding: 14px;
+    font-size: 14px;
+  }
+  .btn-icon { font-size: 24px; }
+
+  /* ── Toast notification ── */
+  #toast {
+    position: fixed;
+    bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: var(--cream);
+    padding: 14px 28px;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { background: var(--arrive); }
+  #toast.error   { background: var(--depart); }
+
+  /* ── Panneau droit : RDV ── */
+  .panel-rdv {
+    background: var(--ink);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+    border-left: 1px solid rgba(255,255,255,0.05);
+  }
+  .panel-rdv .panel-title {
+    color: var(--gold-light);
+    border-bottom-color: rgba(255,255,255,0.1);
+  }
+  .rdv-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rdv-list::-webkit-scrollbar { width: 3px; }
+  .rdv-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+  .rdv-card {
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .rdv-heure {
+    font-size: 13px;
+    color: var(--gold-light);
+    font-weight: 500;
+  }
+  .rdv-titre {
+    font-family: var(--font-title);
+    font-size: 16px;
+    color: var(--cream);
+    line-height: 1.3;
+  }
+  .rdv-lieu {
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .rdv-empty {
+    color: rgba(255,255,255,0.25);
+    font-size: 14px;
+    font-style: italic;
+    text-align: center;
+    margin-top: 40px;
+  }
+  .rdv-loading {
+    color: rgba(255,255,255,0.3);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 40px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+
+  /* ── État de chargement ── */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 50;
+  }
+  .loading-overlay h2 {
+    font-family: var(--font-title);
+    font-size: 24px;
+    color: var(--ink-soft);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--cream-dark);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Erreur de config ── */
+  .config-error {
+    position: fixed; inset: 0;
+    background: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    padding: 32px;
+  }
+  .config-error-box {
+    max-width: 480px;
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .config-error-box h2 {
+    font-family: var(--font-title);
+    font-size: 22px;
+    color: var(--depart);
+    margin-bottom: 12px;
+  }
+  .config-error-box p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .config-error-box code {
+    background: var(--cream);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+</style>
+</head>
+<body>
+
+<!-- CONFIG — MODIFIER ICI -->
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwO74A7OR9V20Ex6WEJJa0oi7C_Hm-2RcIJrGGKb5jxXkKeH4i30dGqAvne3A-Y6iwRWA/exec";
+  // Exemple : "https://script.google.com/macros/s/AKfycb.../exec"
+</script>
+
+<!-- Erreur de configuration -->
+<div class="config-error" id="config-error" style="display:none">
+  <div class="config-error-box">
+    <h2>Configuration requise</h2>
+    <p>Veuillez remplacer <code>COLLER_ICI_URL_WEB_APP_GOOGLE</code> dans le fichier <code>index.html</code> par l'URL de votre Google Apps Script déployé.</p>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-left">
+    <h1>Librairie</h1>
+    <div class="subtitle">Gestion des présences</div>
+  </div>
+  <div class="clock">
+    <div class="time" id="clock-time">--:--</div>
+    <div class="date-str" id="clock-date">...</div>
+  </div>
+</header>
+
+<!-- Contenu principal -->
+<div class="main" id="main-content">
+
+  <!-- Panneau gauche : Pointage -->
+  <div class="panel-pointage">
+    <div class="panel-title">Personnel</div>
+
+    <!-- Zone de confirmation (cachée par défaut) -->
+    <div class="confirmation-zone" id="confirmation-zone">
+      <div>
+        <div class="confirm-name" id="confirm-name">Prénom Nom</div>
+        <div class="confirm-hint">Choisissez le type de pointage</div>
+      </div>
+      <div class="confirm-buttons">
+        <button class="btn btn-arrive" id="btn-arrive" onclick="pointer('arrivee')">
+          <span class="btn-icon">↗</span>
+          Arrivée
+        </button>
+        <button class="btn btn-depart" id="btn-depart" onclick="pointer('depart')">
+          <span class="btn-icon">↙</span>
+          Départ
+        </button>
+        <button class="btn btn-cancel" onclick="deselectionner()">Annuler</button>
+      </div>
+    </div>
+
+    <!-- Grille du personnel -->
+    <div class="personnel-grid" id="personnel-grid">
+      <div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--ink-muted);">
+        <div class="spinner" style="margin:0 auto 12px"></div>
+        Chargement du personnel…
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau droit : RDV du jour -->
+  <div class="panel-rdv">
+    <div class="panel-title">Agenda du jour</div>
+    <div class="rdv-list" id="rdv-list">
+      <div class="rdv-loading">Chargement des rendez-vous…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── ÉTAT DE L'APPLICATION ──────────────────────────────────
+let personnelData    = [];
+let statusData       = {};   // { nom: "Arrivée" | "Départ" | null }
+let personneSelectee = null;
+let toastTimer       = null;
+
+// ── INITIALISATION ────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Vérification de la configuration
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("COLLER_ICI")) {
+    document.getElementById('config-error').style.display = 'flex';
+    return;
+  }
+
+  demarrerHorloge();
+  chargerPersonnel();
+  chargerRdv();
+
+  // Rafraîchir les RDV toutes les 5 minutes
+  setInterval(chargerRdv, 5 * 60 * 1000);
+  // Rafraîchir le personnel toutes les 10 minutes
+  setInterval(chargerPersonnel, 10 * 60 * 1000);
+});
+
+// ── HORLOGE ───────────────────────────────────────────────
+function demarrerHorloge() {
+  function maj() {
+    const now = new Date();
+    const hh  = String(now.getHours()).padStart(2, '0');
+    const mm  = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock-time').textContent = hh + ':' + mm;
+
+    const jours   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const mois    = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    document.getElementById('clock-date').textContent =
+      jours[now.getDay()] + ' ' + now.getDate() + ' ' + mois[now.getMonth()];
+  }
+  maj();
+  setInterval(maj, 10000);
+}
+
+// ── APPEL API ─────────────────────────────────────────────
+async function api(params) {
+  const url = new URL(APPS_SCRIPT_URL);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const resp = await fetch(url.toString(), { method: 'GET' });
+  if (!resp.ok) throw new Error('Erreur réseau : ' + resp.status);
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// ── CHARGER LE PERSONNEL ──────────────────────────────────
+async function chargerPersonnel() {
+  try {
+    const data = await api({ action: 'getPersonnel' });
+    personnelData = data.personnel || [];
+
+    // Charger les statuts du jour pour chaque personne
+    await chargerTousLesStatuts();
+    afficherPersonnel();
+  } catch (err) {
+    document.getElementById('personnel-grid').innerHTML =
+      `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted)">
+        Impossible de charger le personnel.<br><small>${err.message}</small>
+      </div>`;
+  }
+}
+
+async function chargerTousLesStatuts() {
+  const promesses = personnelData.map(async (p) => {
+    try {
+      const r = await api({ action: 'getDernierPointage', nom: p.nom });
+      statusData[p.nom] = r.dernier; // "Arrivée", "Départ" ou null
+    } catch {
+      statusData[p.nom] = null;
+    }
+  });
+  await Promise.all(promesses);
+}
+
+function afficherPersonnel() {
+  const grid = document.getElementById('personnel-grid');
+  if (!personnelData.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted)">Aucun personnel trouvé.</div>';
+    return;
+  }
+
+  grid.innerHTML = personnelData.map(p => {
+    const initiales = p.nom.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const statut    = statusData[p.nom];
+    const present   = statut === 'Arrivée';
+    const selected  = personneSelectee === p.nom ? 'selected' : '';
+
+    return `<div class="person-card ${selected}" onclick="selectionner('${echapper(p.nom)}')">
+      <div class="person-avatar" style="background:${couleurAvatar(p.nom)}">${initiales}</div>
+      <div class="person-name">${p.nom}</div>
+      ${p.fonction ? `<div class="person-fonction">${p.fonction}</div>` : ''}
+      <div class="person-status ${present ? 'present' : 'absent'}">
+        ${present ? '● Présent' : statut === 'Départ' ? '○ Parti' : '○ Non pointé'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function couleurAvatar(nom) {
+  const couleurs = ['#1a3a4a','#2e4a3e','#3a2a4a','#4a3a2a','#2a3a4a','#3a4a2a'];
+  let hash = 0;
+  for (let i = 0; i < nom.length; i++) hash = nom.charCodeAt(i) + ((hash << 5) - hash);
+  return couleurs[Math.abs(hash) % couleurs.length];
+}
+
+// ── SÉLECTION D'UNE PERSONNE ──────────────────────────────
+function selectionner(nom) {
+  personneSelectee = nom;
+
+  // Afficher la zone de confirmation
+  document.getElementById('confirm-name').textContent = nom;
+  document.getElementById('confirmation-zone').classList.add('visible');
+
+  // Pré-sélectionner arrivée/départ selon le statut
+  const statut = statusData[nom];
+  const btnArrive = document.getElementById('btn-arrive');
+  const btnDepart = document.getElementById('btn-depart');
+
+  // Mettre en évidence le bouton logique selon le contexte
+  btnArrive.style.opacity = statut === 'Arrivée' ? '0.5' : '1';
+  btnDepart.style.opacity = !statut || statut === 'Départ' ? '0.5' : '1';
+
+  afficherPersonnel();
+
+  // Scroll vers la zone de confirmation
+  document.getElementById('confirmation-zone').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function deselectionner() {
+  personneSelectee = null;
+  document.getElementById('confirmation-zone').classList.remove('visible');
+  afficherPersonnel();
+}
+
+// ── ENREGISTRER UN POINTAGE ───────────────────────────────
+async function pointer(type) {
+  if (!personneSelectee) return;
+  const nom = personneSelectee;
+
+  // Désactiver les boutons
+  document.getElementById('btn-arrive').disabled = true;
+  document.getElementById('btn-depart').disabled = true;
+
+  try {
+    const ts = new Date().toISOString();
+    await api({ action: 'pointer', nom, type, timestamp: ts });
+
+    // Mettre à jour le statut local
+    statusData[nom] = type === 'arrivee' ? 'Arrivée' : 'Départ';
+
+    const label = type === 'arrivee' ? 'Arrivée' : 'Départ';
+    afficherToast(`${label} enregistrée — ${nom}`, 'success');
+    deselectionner();
+
+  } catch (err) {
+    afficherToast('Erreur : ' + err.message, 'error');
+  } finally {
+    document.getElementById('btn-arrive').disabled = false;
+    document.getElementById('btn-depart').disabled = false;
+  }
+}
+
+// ── CHARGER LES RDV ───────────────────────────────────────
+async function chargerRdv() {
+  const liste = document.getElementById('rdv-list');
+  try {
+    const data = await api({ action: 'getRdvDuJour' });
+    const rdvs = data.rdvs || [];
+
+    if (!rdvs.length) {
+      liste.innerHTML = '<div class="rdv-empty">Aucun rendez-vous aujourd\'hui</div>';
+      return;
+    }
+
+    liste.innerHTML = rdvs.map(rdv => `
+      <div class="rdv-card">
+        <div class="rdv-heure">
+          ${rdv.journee ? 'Toute la journée' : rdv.debut + ' – ' + rdv.fin}
+        </div>
+        <div class="rdv-titre">${rdv.titre}</div>
+        ${rdv.lieu ? `<div class="rdv-lieu">📍 ${rdv.lieu}</div>` : ''}
+      </div>
+    `).join('');
+  } catch (err) {
+    liste.innerHTML = `<div class="rdv-empty">Impossible de charger les RDV<br><small style="font-size:11px;opacity:0.5">${err.message}</small></div>`;
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function afficherToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type ? `show ${type}` : 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+}
+
+// ── UTILITAIRES ───────────────────────────────────────────
+function echapper(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+</script>
+
+<!-- Service Worker pour PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
