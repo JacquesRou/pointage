@@ -1,4 +1,4 @@
-const CACHE_NAME = 'librairie-pointage-v1';
+const CACHE_NAME = 'librairie-pointage-v5'; // Même numéro qu'en haut
 const ASSETS = [
   '/',
   '/index.html',
