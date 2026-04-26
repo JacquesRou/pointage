@@ -407,7 +407,7 @@
 
 <!-- ── CONFIG — MODIFIER ICI ── -->
 <script>
-  const VERSION = "1.1.3";
+  const VERSION = "1.1.4";
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKgRxnY3MyRrNP_EcQRU8rvnvKyzXiwnQY9oTT1kvqpbnr4q6d7P_VP0oLN6esw8jNwQ/exec";
 </script>
 
@@ -536,14 +536,24 @@ function demarrerHorloge() {
 async function api(params) {
   const url = new URL(APPS_SCRIPT_URL);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const resp = await fetch(url.toString(), {
-    method: 'GET',
-    redirect: 'follow',
-  });
-  if (!resp.ok) throw new Error('Erreur réseau : ' + resp.status);
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error);
-  return data;
+  try {
+    const resp = await fetch(url.toString(), {
+      method: 'GET',
+      redirect: 'follow',
+      mode: 'cors',
+    });
+    if (!resp.ok) throw new Error('Erreur réseau : ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  } catch (err) {
+    // Deuxième tentative sans mode strict
+    const resp = await fetch(url.toString(), { redirect: 'follow' });
+    if (!resp.ok) throw new Error('Erreur réseau : ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  }
 }
 
 // ── CHARGER LE PERSONNEL ──────────────────────────────────
