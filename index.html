@@ -111,7 +111,7 @@
       overflow: hidden;
     }
     .personnel-grid {
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     }
     .confirm-buttons {
       grid-template-columns: 1fr 1fr;
@@ -141,50 +141,59 @@
   }
 
   /* ── Grille du personnel ── */
-  .personnel-grid {
-    flex: 1;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-    align-content: start;
-    padding-right: 4px;
-  }
+ .personnel-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  align-content: start;
+  padding-right: 4px;
+}
   .personnel-grid::-webkit-scrollbar { width: 4px; }
   .personnel-grid::-webkit-scrollbar-track { background: transparent; }
   .personnel-grid::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 4px; }
 
-  .person-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 18px 14px 14px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-    overflow: hidden;
-    user-select: none;
-  }
-  .person-card:active { transform: scale(0.96); }
-  .person-card.selected {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.2), var(--shadow);
-  }
-  .person-avatar {
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: var(--cream);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-title);
-    font-size: 20px;
-    flex-shrink: 0;
-  }
+.person-card {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 10px 8px 8px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.person-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-title);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.person-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.2;
+}
+.person-status {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 1px;
+}
   .person-name {
     font-size: 14px;
     font-weight: 500;
@@ -197,13 +206,7 @@
     color: var(--ink-muted);
     text-align: center;
   }
-  .person-status {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 20px;
-    margin-top: 2px;
-  }
+
   .person-status.present {
     background: var(--arrive-bg);
     color: var(--arrive);
@@ -545,6 +548,10 @@ async function chargerPersonnel() {
   try {
     const data = await api({ action: 'getPersonnel' });
     personnelData = data.personnel || [];
+
+    // Tri alphabétique par nom
+    personnelData.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
     await chargerTousLesStatuts();
     afficherPersonnel();
   } catch (err) {
