@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -42,6 +42,7 @@
     overflow-x: hidden;
   }
 
+  /* ── Header ── */
   header {
     background: var(--ink);
     color: var(--cream);
@@ -79,6 +80,7 @@
     text-transform: capitalize;
   }
 
+  /* ── Layout paysage ── */
   .main {
     flex: 1;
     display: grid;
@@ -89,6 +91,7 @@
     height: calc(100vh - 82px);
   }
 
+  /* ── Layout portrait ── */
   @media (orientation: portrait) {
     .main {
       grid-template-columns: 1fr;
@@ -106,6 +109,7 @@
     .btn { padding: 14px 10px; font-size: 14px; }
   }
 
+  /* ── Panneau pointage ── */
   .panel-pointage {
     display: flex;
     flex-direction: column;
@@ -123,6 +127,7 @@
     border-bottom: 1px solid var(--cream-dark);
   }
 
+  /* ── Grille personnel ── */
   .personnel-grid {
     flex: 1;
     overflow-y: auto;
@@ -148,7 +153,6 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    position: relative;
     overflow: hidden;
     user-select: none;
   }
@@ -188,6 +192,7 @@
   .person-status.present { background: var(--arrive-bg); color: var(--arrive); }
   .person-status.absent  { background: var(--cream-dark); color: var(--ink-muted); }
 
+  /* ── Zone de confirmation ── */
   .confirmation-zone {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -198,11 +203,7 @@
     gap: 14px;
   }
   .confirmation-zone.visible { display: flex; }
-  .confirm-name {
-    font-family: var(--font-title);
-    font-size: 22px;
-    color: var(--ink);
-  }
+  .confirm-name { font-family: var(--font-title); font-size: 22px; color: var(--ink); }
   .confirm-hint { font-size: 13px; color: var(--ink-muted); }
   .confirm-buttons {
     display: grid;
@@ -236,6 +237,7 @@
   }
   .btn-icon { font-size: 24px; }
 
+  /* ── Toast ── */
   #toast {
     position: fixed;
     bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
@@ -254,6 +256,7 @@
   #toast.success { background: var(--arrive); }
   #toast.error   { background: var(--depart); }
 
+  /* ── Panneau RDV ── */
   .panel-rdv {
     background: var(--ink);
     padding: 24px;
@@ -326,23 +329,25 @@
   }
   .config-error-box h2 { font-family: var(--font-title); font-size: 22px; color: var(--depart); margin-bottom: 12px; }
   .config-error-box p  { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
-  .config-error-box code { background: var(--cream); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--ink); }
+  .config-error-box code { background: var(--cream); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
 </style>
 </head>
 <body>
 
+<!-- ── CONFIG ── -->
 <script>
-  const VERSION = "1.1.5";
+  const VERSION = "1.1.6";
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKgRxnY3MyRrNP_EcQRU8rvnvKyzXiwnQY9oTT1kvqpbnr4q6d7P_VP0oLN6esw8jNwQ/exec";
 </script>
 
 <div class="config-error" id="config-error" style="display:none">
   <div class="config-error-box">
     <h2>Configuration requise</h2>
-    <p>Veuillez remplacer <code>COLLER_ICI_URL_WEB_APP_GOOGLE</code> dans <code>index.html</code> par l'URL de votre Google Apps Script.</p>
+    <p>Veuillez renseigner <code>APPS_SCRIPT_URL</code> dans le fichier <code>index.html</code>.</p>
   </div>
 </div>
 
+<!-- ── Header ── -->
 <header>
   <div class="header-left">
     <h1>Bienvenue</h1>
@@ -354,7 +359,8 @@
   </div>
 </header>
 
-<div class="main" id="main-content">
+<!-- ── Contenu ── -->
+<div class="main">
 
   <div class="panel-pointage">
     <div class="panel-title">Personnel</div>
@@ -439,34 +445,43 @@ function demarrerHorloge() {
   setInterval(maj, 10000);
 }
 
-// ── APPEL API ─────────────────────────────────────────────
-// Utilise XMLHttpRequest pour contourner le problème CORS/redirect de Google Apps Script
-function apiXHR(params) {
+// ── APPEL API via JSONP — contourne le blocage CORS ───────
+function api(params) {
   return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Délai dépassé'));
+    }, 30000);
+
+    function cleanup() {
+      delete window[callbackName];
+      const el = document.getElementById(callbackName);
+      if (el) el.remove();
+    }
+
+    window[callbackName] = (data) => {
+      clearTimeout(timer);
+      cleanup();
+      if (data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+
     const url = new URL(APPS_SCRIPT_URL);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
+    url.searchParams.set('callback', callbackName);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url.toString(), true);
-    xhr.onload = () => {
-      try {
-        const data = JSON.parse(xhr.responseText);
-        if (data.error) reject(new Error(data.error));
-        else resolve(data);
-      } catch (e) {
-        reject(new Error('Réponse invalide du serveur'));
-      }
+    const script = document.createElement('script');
+    script.id  = callbackName;
+    script.src = url.toString();
+    script.onerror = () => {
+      clearTimeout(timer);
+      cleanup();
+      reject(new Error('Erreur réseau'));
     };
-    xhr.onerror = () => reject(new Error('Erreur réseau'));
-    xhr.ontimeout = () => reject(new Error('Délai dépassé'));
-    xhr.timeout = 30000;
-    xhr.send();
+    document.head.appendChild(script);
   });
-}
-
-// Alias pour compatibilité avec le reste du code
-async function api(params) {
-  return apiXHR(params);
 }
 
 // ── CHARGER LE PERSONNEL ──────────────────────────────────
@@ -525,7 +540,7 @@ function couleurAvatar(nom) {
   return couleurs[Math.abs(hash) % couleurs.length];
 }
 
-// ── SÉLECTION D'UNE PERSONNE ──────────────────────────────
+// ── SÉLECTION ─────────────────────────────────────────────
 function selectionner(nom) {
   personneSelectee = nom;
   document.getElementById('confirm-name').textContent = nom;
@@ -546,23 +561,20 @@ function deselectionner() {
   afficherPersonnel();
 }
 
-// ── ENREGISTRER UN POINTAGE ───────────────────────────────
+// ── POINTER ───────────────────────────────────────────────
 async function pointer(type) {
   if (!personneSelectee) return;
   const nom      = personneSelectee;
   const remarque = document.getElementById('remarque-input').value.trim();
-  console.log('Envoi pointage:', { nom, type, remarque });
+
   document.getElementById('btn-arrive').disabled = true;
   document.getElementById('btn-depart').disabled = true;
 
   try {
-    // Plus de timestamp — l'heure vient du serveur Google
     await api({ action: 'pointer', nom, type, remarque });
-
     statusData[nom] = type === 'arrivee' ? 'Arrivée' : 'Départ';
     afficherToast(`${type === 'arrivee' ? 'Arrivée' : 'Départ'} enregistrée — ${nom}`, 'success');
     deselectionner();
-
   } catch (err) {
     afficherToast('Erreur : ' + err.message, 'error');
   } finally {
@@ -571,18 +583,16 @@ async function pointer(type) {
   }
 }
 
-// ── CHARGER LES RDV ───────────────────────────────────────
+// ── RDV ───────────────────────────────────────────────────
 async function chargerRdv() {
   const liste = document.getElementById('rdv-list');
   try {
     const data = await api({ action: 'getRdvDuJour' });
     const rdvs = data.rdvs || [];
-
     if (!rdvs.length) {
       liste.innerHTML = '<div class="rdv-empty">Aucun rendez-vous aujourd\'hui</div>';
       return;
     }
-
     liste.innerHTML = rdvs.map(rdv => `
       <div class="rdv-card">
         <div class="rdv-heure">${rdv.journee ? 'Toute la journée' : rdv.debut + ' – ' + rdv.fin}</div>
