@@ -1,4 +1,4 @@
-.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -22,7 +22,6 @@
     --arrive:     #2e7d5e;
     --arrive-bg:  #e8f5ef;
     --depart:     #8b3a2e;
-    --depart-bg:  #faeae7;
     --card-bg:    #ffffff;
     --shadow:     0 2px 16px rgba(26,26,46,0.10);
     --radius:     16px;
@@ -46,7 +45,7 @@
   header {
     background: var(--ink);
     color: var(--cream);
-    padding: 20px 28px 16px;
+    padding: 14px 20px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -54,13 +53,12 @@
   }
   .header-left h1 {
     font-family: var(--font-title);
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 400;
-    letter-spacing: 0.01em;
     color: var(--cream);
   }
   .header-left .subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--ink-muted);
     margin-top: 2px;
     font-weight: 300;
@@ -68,15 +66,15 @@
   .clock { text-align: right; }
   .clock .time {
     font-family: var(--font-title);
-    font-size: 32px;
+    font-size: 28px;
     color: var(--gold-light);
     letter-spacing: 0.05em;
     line-height: 1;
   }
   .clock .date-str {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--ink-muted);
-    margin-top: 3px;
+    margin-top: 2px;
     text-transform: capitalize;
   }
 
@@ -84,28 +82,39 @@
   .main {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 320px;
     grid-template-rows: 1fr;
     gap: 0;
     overflow: hidden;
-    height: calc(100vh - 82px);
+    height: calc(100vh - 70px);
   }
 
   /* ── Layout portrait ── */
   @media (orientation: portrait) {
     .main {
       grid-template-columns: 1fr;
-      grid-template-rows: 1fr 280px;
-      height: calc(100vh - 82px);
+      grid-template-rows: 1fr auto;
+      height: auto;
+      min-height: calc(100vh - 70px);
+      overflow: visible;
     }
     .panel-rdv {
       border-left: none;
       border-top: 1px solid rgba(255,255,255,0.05);
       order: 2;
+      min-height: 160px;
+      max-height: 220px;
     }
-    .panel-pointage { order: 1; overflow: hidden; }
-    .personnel-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
-    .confirm-buttons { grid-template-columns: 1fr 1fr; }
+    .panel-pointage {
+      order: 1;
+      overflow: visible;
+      height: auto;
+    }
+    .personnel-grid {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      overflow: visible;
+      height: auto;
+    }
     .btn { padding: 14px 10px; font-size: 14px; }
   }
 
@@ -113,18 +122,19 @@
   .panel-pointage {
     display: flex;
     flex-direction: column;
-    padding: 24px;
-    gap: 16px;
+    padding: 16px;
+    gap: 12px;
     overflow: hidden;
   }
   .panel-title {
     font-family: var(--font-title);
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 400;
     color: var(--ink-soft);
     letter-spacing: 0.02em;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--cream-dark);
+    flex-shrink: 0;
   }
 
   /* ── Grille personnel ── */
@@ -132,29 +142,30 @@
     flex: 1;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 8px;
     align-content: start;
-    padding-right: 4px;
+    padding-bottom: 8px;
   }
   .personnel-grid::-webkit-scrollbar { width: 4px; }
   .personnel-grid::-webkit-scrollbar-track { background: transparent; }
   .personnel-grid::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 4px; }
 
+  /* ── Carte personne ── */
   .person-card {
     background: var(--card-bg);
     border-radius: 10px;
-    padding: 10px 8px 8px;
+    padding: 10px 6px 8px;
     box-shadow: var(--shadow);
     cursor: pointer;
     border: 2px solid transparent;
-    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    transition: transform 0.15s, border-color 0.15s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    overflow: hidden;
+    gap: 5px;
     user-select: none;
+    min-height: 90px;
   }
   .person-card:active { transform: scale(0.96); }
   .person-card.selected {
@@ -162,12 +173,12 @@
     box-shadow: 0 0 0 3px rgba(201,168,76,0.2), var(--shadow);
   }
   .person-avatar {
-    width: 36px; height: 36px;
+    width: 38px; height: 38px;
     border-radius: 50%;
     color: var(--cream);
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-title);
-    font-size: 14px;
+    font-size: 15px;
     flex-shrink: 0;
   }
   .person-name {
@@ -175,10 +186,12 @@
     font-weight: 500;
     color: var(--ink);
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.3;
+    word-break: break-word;
+    width: 100%;
   }
   .person-fonction {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--ink-muted);
     text-align: center;
   }
@@ -187,7 +200,7 @@
     font-weight: 500;
     padding: 2px 8px;
     border-radius: 20px;
-    margin-top: 1px;
+    white-space: nowrap;
   }
   .person-status.present { background: var(--arrive-bg); color: var(--arrive); }
   .person-status.absent  { background: var(--cream-dark); color: var(--ink-muted); }
@@ -196,33 +209,34 @@
   .confirmation-zone {
     background: var(--card-bg);
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 16px;
     box-shadow: var(--shadow);
     display: none;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
+    flex-shrink: 0;
   }
   .confirmation-zone.visible { display: flex; }
-  .confirm-name { font-family: var(--font-title); font-size: 22px; color: var(--ink); }
-  .confirm-hint { font-size: 13px; color: var(--ink-muted); }
+  .confirm-name { font-family: var(--font-title); font-size: 20px; color: var(--ink); }
+  .confirm-hint { font-size: 12px; color: var(--ink-muted); }
   .confirm-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
   .btn {
     border: none;
     border-radius: 12px;
-    padding: 18px 12px;
+    padding: 16px 10px;
     font-family: var(--font-body);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.1s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     line-height: 1;
   }
   .btn:active { transform: scale(0.96); opacity: 0.85; }
@@ -232,25 +246,27 @@
     background: var(--cream-dark);
     color: var(--ink-soft);
     grid-column: 1 / -1;
-    padding: 14px;
-    font-size: 14px;
+    padding: 12px;
+    font-size: 13px;
   }
-  .btn-icon { font-size: 24px; }
+  .btn-icon { font-size: 20px; }
 
   /* ── Toast ── */
   #toast {
     position: fixed;
-    bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
     background: var(--ink);
     color: var(--cream);
-    padding: 14px 28px;
+    padding: 12px 24px;
     border-radius: 40px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     box-shadow: 0 4px 24px rgba(0,0,0,0.3);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 100;
     white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
   #toast.success { background: var(--arrive); }
@@ -259,10 +275,10 @@
   /* ── Panneau RDV ── */
   .panel-rdv {
     background: var(--ink);
-    padding: 24px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     overflow: hidden;
     border-left: 1px solid rgba(255,255,255,0.05);
   }
@@ -275,40 +291,40 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
   .rdv-list::-webkit-scrollbar { width: 3px; }
   .rdv-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
   .rdv-card {
     background: rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 10px 12px;
     border-left: 3px solid var(--gold);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
-  .rdv-heure { font-size: 13px; color: var(--gold-light); font-weight: 500; }
-  .rdv-titre { font-family: var(--font-title); font-size: 16px; color: var(--cream); line-height: 1.3; }
-  .rdv-lieu  { font-size: 12px; color: var(--ink-muted); }
+  .rdv-heure { font-size: 12px; color: var(--gold-light); font-weight: 500; }
+  .rdv-titre { font-family: var(--font-title); font-size: 14px; color: var(--cream); line-height: 1.3; }
+  .rdv-lieu  { font-size: 11px; color: var(--ink-muted); }
   .rdv-empty {
     color: rgba(255,255,255,0.25);
-    font-size: 14px;
+    font-size: 13px;
     font-style: italic;
     text-align: center;
-    margin-top: 40px;
+    margin-top: 20px;
   }
   .rdv-loading {
     color: rgba(255,255,255,0.3);
-    font-size: 13px;
+    font-size: 12px;
     text-align: center;
-    margin-top: 40px;
+    margin-top: 20px;
     animation: pulse 1.5s ease-in-out infinite;
   }
   @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
 
   .spinner {
-    width: 36px; height: 36px;
+    width: 32px; height: 32px;
     border: 3px solid var(--cream-dark);
     border-top-color: var(--gold);
     border-radius: 50%;
@@ -324,20 +340,20 @@
   }
   .config-error-box {
     max-width: 480px; background: #fff;
-    border-radius: var(--radius); padding: 32px;
+    border-radius: var(--radius); padding: 28px;
     box-shadow: var(--shadow); text-align: center;
   }
-  .config-error-box h2 { font-family: var(--font-title); font-size: 22px; color: var(--depart); margin-bottom: 12px; }
-  .config-error-box p  { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
-  .config-error-box code { background: var(--cream); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .config-error-box h2 { font-family: var(--font-title); font-size: 20px; color: var(--depart); margin-bottom: 10px; }
+  .config-error-box p  { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .config-error-box code { background: var(--cream); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 </style>
 </head>
 <body>
 
 <!-- ── CONFIG ── -->
 <script>
-  const VERSION = "1.1.7";
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzESDrFfb8SWVVM38_la5HqDTGCoOepFBRvJp9iMCSoCQi6QJRlcx-7weo7lpnOLn3F9A/exec";
+  const VERSION = "1.1.8";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKgRxnY3MyRrNP_EcQRU8rvnvKyzXiwnQY9oTT1kvqpbnr4q6d7P_VP0oLN6esw8jNwQ/exec";
 </script>
 
 <div class="config-error" id="config-error" style="display:none">
@@ -347,7 +363,6 @@
   </div>
 </div>
 
-<!-- ── Header ── -->
 <header>
   <div class="header-left">
     <h1>Bienvenue</h1>
@@ -359,7 +374,6 @@
   </div>
 </header>
 
-<!-- ── Contenu ── -->
 <div class="main">
 
   <div class="panel-pointage">
@@ -373,8 +387,8 @@
       <textarea id="remarque-input"
         placeholder="Remarque (optionnel)..."
         rows="2"
-        style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--cream-dark);
-               font-family:var(--font-body); font-size:14px; color:var(--ink); resize:none;
+        style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--cream-dark);
+               font-family:var(--font-body); font-size:13px; color:var(--ink); resize:none;
                background:var(--cream); outline:none;"></textarea>
       <div class="confirm-buttons">
         <button class="btn btn-arrive" id="btn-arrive" onclick="pointer('arrivee')">
@@ -407,13 +421,11 @@
 <div id="toast"></div>
 
 <script>
-// ── ÉTAT ──────────────────────────────────────────────────
 let personnelData    = [];
 let statusData       = {};
 let personneSelectee = null;
 let toastTimer       = null;
 
-// ── INITIALISATION ────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('version').textContent = VERSION;
 
@@ -429,7 +441,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setInterval(chargerPersonnel, 10 * 60 * 1000);
 });
 
-// ── HORLOGE ───────────────────────────────────────────────
 function demarrerHorloge() {
   function maj() {
     const now = new Date();
@@ -445,7 +456,7 @@ function demarrerHorloge() {
   setInterval(maj, 10000);
 }
 
-// ── APPEL API via JSONP — contourne le blocage CORS ───────
+// ── JSONP — contourne CORS ────────────────────────────────
 function api(params) {
   return new Promise((resolve, reject) => {
     const callbackName = 'jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
@@ -484,7 +495,6 @@ function api(params) {
   });
 }
 
-// ── CHARGER LE PERSONNEL ──────────────────────────────────
 async function chargerPersonnel() {
   try {
     const data = await api({ action: 'getPersonnel' });
@@ -540,7 +550,6 @@ function couleurAvatar(nom) {
   return couleurs[Math.abs(hash) % couleurs.length];
 }
 
-// ── SÉLECTION ─────────────────────────────────────────────
 function selectionner(nom) {
   personneSelectee = nom;
   document.getElementById('confirm-name').textContent = nom;
@@ -561,7 +570,6 @@ function deselectionner() {
   afficherPersonnel();
 }
 
-// ── POINTER ───────────────────────────────────────────────
 async function pointer(type) {
   if (!personneSelectee) return;
   const nom      = personneSelectee;
@@ -583,7 +591,6 @@ async function pointer(type) {
   }
 }
 
-// ── RDV ───────────────────────────────────────────────────
 async function chargerRdv() {
   const liste = document.getElementById('rdv-list');
   try {
@@ -605,7 +612,6 @@ async function chargerRdv() {
   }
 }
 
-// ── TOAST ─────────────────────────────────────────────────
 function afficherToast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -614,7 +620,6 @@ function afficherToast(msg, type = '') {
   toastTimer = setTimeout(() => { t.className = ''; }, 3500);
 }
 
-// ── UTILITAIRES ───────────────────────────────────────────
 function echapper(str) {
   return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
